@@ -39,6 +39,12 @@ import (
 	"strings"
 )
 
+// This interface allows us to replace the stock http.Client with anything
+// that simulates its behaviour.
+type HttpClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 // This signature represents a character encoding conversion routine.
 // Used to tell the xml decoder how to deal with non-utf8 characters.
 type CharsetFunc func(charset string, input io.Reader) (io.Reader, error)
@@ -194,7 +200,7 @@ func (this *Document) LoadFile(filename string, charset CharsetFunc) (err error)
 
 // Load the contents of this document from the supplied uri using the specifed
 // client.
-func (this *Document) LoadUriClient(uri string, client *http.Client, charset CharsetFunc) (err error) {
+func (this *Document) LoadUriClient(uri string, client HttpClient, charset CharsetFunc) (err error) {
 	var r *http.Response
 
 	req, err := http.NewRequest("GET", uri, nil)
