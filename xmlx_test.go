@@ -398,3 +398,25 @@ func TestSelectNodesDirect(t *testing.T) {
 		t.Errorf("Unexcepted hidden nodes found. Expected: 2, Got: %d", len(nodes))
 	}
 }
+
+func TestHttpClient(t *testing.T) {
+	type TestClient struct {}
+	func (t *TestClient) Do(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			Status: "200 Ok",
+			StatusCode: 200,
+		        Body: ioutil.NopCloser(bytes.NewBufferString("<body>Hello World</body>")),
+		}
+	}
+	
+	var c xmlx.HttpClient = TestClient{}
+	
+	doc := New()
+	r := doc.LoadUriClient("http://example.com/", c, charSet)
+	
+	expected := "<body>Hello World</body>"
+	
+	if got := doc.Root.String(); got != expected {
+		t.Fatalf("expected: \n%s\ngot: \n%s\n", expected, got)
+	}
+}
